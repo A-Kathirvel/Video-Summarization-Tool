@@ -1,7 +1,8 @@
 <div class="flex items-center justify-center min-h-screen bg-gray-100">
     <div class="bg-white shadow-lg rounded-md p-8 w-full max-w-lg">
-      <h1 class="text-2xl font-bold text-gray-800 text-center mb-6">📹 Video Summarization Tool</h1>
-
+      <!-- <h1 class="text-2xl font-bold text-gray-800 text-center mb-6">📹 Video Summarization Tool</h1> -->
+      <h5 *ngIf="username | async as username" class="text-2xl font-bold text-gray-800 text-center mb-6">Hello {{ username }}!</h5>
+      
       <form (ngSubmit)="uploadFile()">
       <!-- File Upload Input -->
       <label class="block w-full p-2 border border-gray-300 rounded-md text-gray-600 cursor-pointer hover:bg-gray-100">
@@ -14,12 +15,14 @@
       <p *ngIf="!selectedFileName" class="text-red-500">{{errorMessage}}</p>
       <!-- Upload Button -->
        <div class="text-center">
-        <button (click)="uploadFile()" 
+        <button type="submit"
           class="w-auto bg-blue-700 hover:bg-blue-800 text-white font-medium py-2 px-2 rounded-md mt-4 transition-all duration-200">
           🚀 Upload & Summarize
         </button>
       </div>
     </form>
+
+    <a routerLink="/profile" class="text-blue-600 hover:text-blue-700">Profile</a>
   
       <!-- Summary Section -->
       <div *ngIf="summary" class="mt-6 p-4 bg-gray-50 border border-gray-300 rounded-md">

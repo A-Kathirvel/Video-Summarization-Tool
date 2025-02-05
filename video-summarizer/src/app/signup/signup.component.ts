@@ -49,7 +49,6 @@ export class SignupComponent {
       const data=this.signupform.value;
       this.authService.addUser(data).subscribe({
         next: (res)=>{
-          console.log(res);
           this.signupform.reset();
           this.submitted=false;
           this.errorMessage='';
@@ -57,9 +56,6 @@ export class SignupComponent {
         },
         error:(err)=>{
           this.errorMessage=err.error['error'];
-          console.log(err);
-          console.log(err.error.error);
-          console.log(err.message);
         }
       })
     }

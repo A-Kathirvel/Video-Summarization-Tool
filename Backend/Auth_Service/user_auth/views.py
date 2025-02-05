@@ -11,31 +11,27 @@ import bcrypt
 import jwt
 import datetime
 from django.conf import settings
-# import requests
+from django.middleware.csrf import get_token
+from django.views import View
+from rest_framework.permissions import IsAuthenticated
+import os
+from dotenv import load_dotenv
 
-# Secret key for JWT (add this in settings.py)
-SECRET_KEY = "dbncjdhfjen32678930oeijdfhncbveuiyuwe8srty890-plkjhgfr43wsxcvgyu89olmngt54edf7"
+# Load environment variables
+load_dotenv()
 
-# MongoDB Connection
-client = pymongo.MongoClient("mongodb://localhost:27017/")
-db = client["test_db"]
-collection = db["users"]
+# Get values from .env
+MONGO_URI = os.getenv("MONGO_URI")
+MONGO_DB_NAME = os.getenv("MONGO_DB_NAME")
+MONGO_COLLECTION_NAME = os.getenv("MONGO_COLLECTION_NAME")
+
+# Connect to MongoDB
+client = pymongo.MongoClient(MONGO_URI)
+db = client[MONGO_DB_NAME]
+collection = db[MONGO_COLLECTION_NAME]
 
 @api_view(['POST'])
 def signup(request):
-    # data = json.loads(request.body)
-    # print(data)
-    # collection.insert_one(data)
-    # username = data.get("username")
-    # email = data.get("email")
-    # password = data.get("password")
-    
-    # if User.objects.filter(username=username).exists():
-    #     return JsonResponse({'error': 'Username already exists'}, status=400)
-    
-    # user = User.objects.create_user(username=username, email=email, password=password)
-    # return JsonResponse({'message': 'User created successfully'})
-
     if request.method == "POST":
         try:
             data = json.loads(request.body)
@@ -48,11 +44,6 @@ def signup(request):
             # Check for missing fields
             if not username or not email or not password:
                 return JsonResponse({"error": "Username, email, and password are required"}, status=400)
-
-            # Check if user already exists
-            # existing_user = collection.find_one({"$or": [{"username": username}, {"email": email}]})
-            # if existing_user:
-            #     return JsonResponse({"error": "User with this username or email already exists"}, status=400)
             
             # Check if user already exists
             existing_user = collection.find_one({"email": email})
@@ -69,29 +60,12 @@ def signup(request):
                 "password": hashed_password.decode("utf-8")  # Store as a string
             })
 
-            # Insert new user
-            # collection.insert_one(data)
             return JsonResponse({"message": "User registered successfully"}, status=201)
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON data"}, status=400)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
-
-# @api_view(['POST'])
-# def signin(request):
-#     data = json.loads(request.body)
-#     username = data.get("username")
-#     password = data.get("password")
-    
-#     user = User.objects.filter(username=username).first()
-#     if user and user.check_password(password):
-#         refresh = RefreshToken.for_user(user)
-#         return JsonResponse({
-#             'refresh': str(refresh),
-#             'access': str(refresh.access_token),
-#         })
-#     return JsonResponse({'error': 'Invalid credentials'}, status=401)
 
 @api_view(['POST'])
 def signin(request):
@@ -116,37 +90,68 @@ def signin(request):
             if not bcrypt.checkpw(password.encode("utf-8"), user["password"].encode("utf-8")):
                 return JsonResponse({"error": "Incorrect password"}, status=401)
 
-            # username = collection.findOne({ "email": email })
             username=user['username']
-            print(username)
             # Generate JWT Token (expires in 1 hour)
             payload = {
                 "username": username,
                 "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
             }
-            token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+            token = jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
 
-            return JsonResponse({"message": "Login successful", "token": token}, status=200)
+            return JsonResponse({"message": "Login successful", "token": token, "username":username}, status=200)
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON data"}, status=400)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
+@api_view(['POST'])
+def getUserdetails(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)            
+            name = data.get("username")
+            res = collection.find_one({"username": name})
+            
+            if res:
+                # Convert ObjectId to string
+                res['_id'] = str(res['_id'])
+                return JsonResponse(res, safe=False)
+            else:
+                return JsonResponse({"error": "User not found"}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({"error":"Invalid Json data"},status=400)
+    return JsonResponse({"error": "Invalid request method"}, status=405)
 
+@api_view(['PUT'])
+def updatePassword(request):
+    if request.method == 'PUT':
+        try:
+            # Get data from the request
+            data = json.loads(request.body)
+            username = data.get("username")
+            oldPassword = data.get("oldPassword")
+            newPassword = data.get("newPassword")
 
-# SUMMARIZATION_SERVICE_URL = "http://127.0.0.1:8002"
+            # Fetch the user data from the database
+            user = collection.find_one({"username": username})
+            if user:
+                # Retrieve stored hashed password
+                stored_password = user.get("password")
+                # Compare old password with the hashed password from the database
+                if bcrypt.checkpw(oldPassword.encode('utf-8'), stored_password.encode('utf-8')):
+                    # Hash the new password
+                    hashed_new_password = bcrypt.hashpw(newPassword.encode('utf-8'), bcrypt.gensalt())
 
-# def get_user_summaries(request):
-#     token = request.headers.get("Authorization")
-    
-#     if not token:
-#         return JsonResponse({"error": "Token is missing"}, status=401)
+                    # Update the password in the database
+                    collection.update_one({"username": username}, {"$set": {"password": hashed_new_password.decode('utf-8')}})
 
-#     headers = {"Authorization": token}
-    
-#     try:
-#         response = requests.get(f"{SUMMARIZATION_SERVICE_URL}/summaries/", headers=headers)
-#         return JsonResponse(response.json(), status=response.status_code)
-#     except requests.RequestException:
-#         return JsonResponse({"error": "Failed to connect to summarization service"}, status=500)
+                    return JsonResponse({"message": "Password updated successfully"}, status=200)
+                else:
+                    return JsonResponse({"error": "Old password is incorrect"}, status=400)
+            else:
+                return JsonResponse({"error": "User not found"}, status=404)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON data"}, status=400)
+    return JsonResponse({"error": "Invalid request method"}, status=405)

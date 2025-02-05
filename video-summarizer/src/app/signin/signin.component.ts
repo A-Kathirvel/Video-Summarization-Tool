@@ -20,6 +20,8 @@ export class SigninComponent {
         email:['',Validators.required],
         password:['',Validators.required],
       })
+
+      this.authService.logout()
     }
 
     onSubmit(){
@@ -28,16 +30,14 @@ export class SigninComponent {
         const data=this.signinform.value;
         this.authService.login(data).subscribe({
           next:(res)=>{
-            console.log(res);
             this.signinform.reset();
             this.submitted=false;
             this.errorMessage='';
+            this.authService.saveSession(res.token,res.username);
             this.route.navigate(['upload']);
           },
           error:(err)=>{
             this.errorMessage=err.error['error'];
-            console.log(err);
-            console.log(err.error);
           }
         })
       }

@@ -10,11 +10,21 @@ import whisper
 from transformers import pipeline
 import pymongo
 from googletrans import Translator
+import os
+from dotenv import load_dotenv
 
-# MongoDB Connection
-client = pymongo.MongoClient("mongodb://localhost:27017/")
-db = client["test_db"]
-collection = db["videos"]
+# Load environment variables
+load_dotenv()
+
+# Get values from .env
+MONGO_URI = os.getenv("MONGO_URI")
+MONGO_DB_NAME = os.getenv("MONGO_DB_NAME")
+MONGO_COLLECTION_NAME = os.getenv("MONGO_COLLECTION_NAME")
+
+# Connect to MongoDB
+client = pymongo.MongoClient(MONGO_URI)
+db = client[MONGO_DB_NAME]
+collection = db[MONGO_COLLECTION_NAME]
 
 # Load Whisper Model
 whisper_model = whisper.load_model("base")

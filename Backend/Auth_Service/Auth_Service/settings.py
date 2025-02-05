@@ -12,6 +12,14 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import pymongo
+from datetime import timedelta
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,10 +28,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-f3pra+6urhvahg9$6t$tk0mrjh#v01sm%)pa-m&lrx+tjt*v!u'
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = []
 
@@ -126,11 +134,17 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:4200',  # Angular frontend
-]
+# Enable credentials (cookies) for cross-origin requests
 CORS_ALLOW_CREDENTIALS = True
 
-# import pymongo
-client = pymongo.MongoClient("mongodb://localhost:27017/")
-db = client["test_db"]
+# Add your frontend URL to CORS_ALLOWED_ORIGINS
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:4200",  # Angular frontend
+]
+
+# CSRF settings for cross-origin requests
+CSRF_TRUSTED_ORIGINS = ["http://localhost:4200"]
+SESSION_COOKIE_SAMESITE = "None"  # Necessary for cross-origin requests
+SESSION_COOKIE_SECURE = False  # Set to True in production (HTTPS)
+CSRF_COOKIE_SAMESITE = "None"
+CSRF_COOKIE_SECURE = False
