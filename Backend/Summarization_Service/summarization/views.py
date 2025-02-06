@@ -87,6 +87,7 @@ def upload_video(request):
     Upload video, process it, and store metadata in MongoDB.
     """
     video = request.FILES.get('video')
+    username = request.data.get('username') 
     if not video:
         return JsonResponse({'error': 'No video uploaded'}, status=400)
 
@@ -104,6 +105,7 @@ def upload_video(request):
         tamil_summary = translate_text(summary, target_language="ta")
 
         video_data = {
+            "user":username,
             "title": video.name,
             "video_path": video_path,
             "transcript": transcript,

@@ -11,7 +11,7 @@ const routes: Routes = [
   { path:'signin', component: SigninComponent },
   { path:'signup', component: SignupComponent },
   { path:'upload', component:UploadVideoComponent,canActivate: [AuthGuard]},
-  { path:'profile', component:UserProfileComponent}
+  { path:'profile', component:UserProfileComponent,canActivate: [AuthGuard]}
 ];
 
 @NgModule({

@@ -59,4 +59,8 @@ export class AuthService {
   updatePassword(username: string, oldPassword:string, newPassword: string): Observable<any> {
     return this.http.put(`${this.apiurl}/updatepassword/`, { username, oldPassword, newPassword });
   }
+
+  getVideoDetials(data:any):Observable<any>{
+    return this.http.post(`${this.apiurl}/getvideodetials/`,data);
+  }
 }

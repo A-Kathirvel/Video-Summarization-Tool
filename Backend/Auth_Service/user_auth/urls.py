@@ -6,4 +6,5 @@ urlpatterns = [
     path('signin/',signin),
     path("getuserdetails/",getUserdetails),
     path("updatepassword/",updatePassword),
+    path("getvideodetials/",getVideoDetials)
 ]

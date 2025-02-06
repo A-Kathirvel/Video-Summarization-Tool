@@ -29,6 +29,7 @@ MONGO_COLLECTION_NAME = os.getenv("MONGO_COLLECTION_NAME")
 client = pymongo.MongoClient(MONGO_URI)
 db = client[MONGO_DB_NAME]
 collection = db[MONGO_COLLECTION_NAME]
+collection2 = db['videos']
 
 @api_view(['POST'])
 def signup(request):
@@ -154,4 +155,26 @@ def updatePassword(request):
 
         except json.JSONDecodeError:
             return JsonResponse({"error": "Invalid JSON data"}, status=400)
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+@api_view(['POST'])
+def getVideoDetials(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)            
+            name = data.get("username")
+            print(name)
+            results = collection2.find({"user": name})
+            
+            if results:
+                # Convert ObjectId to string and create a list of results
+                response_data = []
+                for res in results:
+                    res['_id'] = str(res['_id'])  # Convert ObjectId to string
+                    response_data.append(res)
+                return JsonResponse(response_data, safe=False, status=200)
+            else:
+                return JsonResponse({"error": "User not found"}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({"error":"Invalid Json data"},status=400)
     return JsonResponse({"error": "Invalid request method"}, status=405)

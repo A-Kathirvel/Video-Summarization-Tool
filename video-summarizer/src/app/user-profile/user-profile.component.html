@@ -40,5 +40,33 @@
         </div>
       </form>
     </div>
-  </div>
+
+  
+  <h1 class="text-blue-600 mt-10 font-medium text-3xl">Your Summaries</h1>
+  <table class=" m-2 max-w-6xl mx-auto border-collapse">
+    <thead>
+      <tr class="bg-gray-100">
+        <th class="px-4 py-2 text-left text-sm font-medium text-gray-600 border">Title</th>
+        <th class="px-4 py-2 text-left text-sm font-medium text-gray-600 border">Summary</th>
+        <th class="px-4 py-2 text-left text-sm font-medium text-gray-600 border">Tamil Summary</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let video of videoDetails" class="odd:bg-gray-50 even:bg-white">
+        <td class="px-4 py-2 text-sm text-gray-700 border">{{ video.title }}</td>
+        <td class="px-4 py-2 text-sm text-gray-700 border">{{ video.summary }}</td>
+        <td class="px-4 py-2 text-sm text-gray-700 border">{{ video.tamil_summary }}</td>
+      </tr>
+    </tbody>
+  </table>
+  
+  
+</div>
+  <!-- <div *ngIf="videoDetails.length > 0; else noData">
+    <div *ngFor="let video of videoDetails">
+      <p><strong>Summary:</strong> {{ video.summary }}</p>
+      <p><strong>Video ID:</strong> {{ video._id }}</p>
+    </div>
+  </div> -->
+  
   

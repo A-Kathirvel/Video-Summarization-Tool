@@ -36,6 +36,11 @@ export class UploadVideoComponent {
     }
 
     const formData=new FormData();
+    this.username.subscribe(usernamevalue =>{
+      if(usernamevalue){
+        formData.append('username', usernamevalue);
+      }
+    })
     formData.append('video',this.selectedFile);
     this.http.post('http://127.0.0.1:8001/api/upload/',formData).subscribe({
       next:(res:object)=>{

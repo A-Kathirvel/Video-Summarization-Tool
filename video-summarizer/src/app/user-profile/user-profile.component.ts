@@ -15,6 +15,7 @@ export class UserProfileComponent {
   username:Observable<string | null>=this.authService.getUsername();
   passwordform!: FormGroup;
   userDetails: any;
+  videoDetails: any[] = [];  
   showPasswordForm: boolean = false;
   showProfile:boolean=true;
   newPassword: string = '';
@@ -26,6 +27,7 @@ export class UserProfileComponent {
   constructor(private fb: FormBuilder, private http:HttpClient, private authService:AuthService, private route:Router){}
   ngOnInit(): void {
     this.getUserDetails();
+    this.getVideoDetials();
 
     this.passwordform = this.fb.group({
       oldPassword: ['',Validators.required],
@@ -75,5 +77,22 @@ export class UserProfileComponent {
         }
       });
     }
+  }
+
+  getVideoDetials(){
+    this.username.subscribe(usernamevalue =>{
+      if(usernamevalue){
+        this.authService.getVideoDetials({"username":usernamevalue}).subscribe({
+          next:(res)=>{
+            this.videoDetails=res;
+            console.log(res);
+          },
+          error:(err)=>{
+            console.log(err);
+            this.errorMessage = err.error?.message || 'Something went wrong';
+          }
+        })
+      }
+    })
   }
 }

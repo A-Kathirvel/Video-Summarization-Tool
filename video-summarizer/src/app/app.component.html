@@ -1,1 +1,37 @@
+<nav class="bg-white p-4 flex items-center justify-between">
+<!-- <nav class="bg-navy p-4 flex items-center justify-between fixed top-0 left-0 w-full z-50 shadow-md"> -->
+    <a class="flex items-center" routerLink="/" title="Novacis Digital">
+        <b>
+          <span class="text-blue-700 text-2xl lg:text-2xl">Video Summarizer</span>
+        </b>
+    </a>      
+    
+    <button class="lg:hidden text-white" (click)="isMenuOpen = !isMenuOpen">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+      </svg>
+    </button>
+    
+    <div [ngClass]="{'hidden': !isMenuOpen, 'block': isMenuOpen}" class="lg:flex lg:items-center lg:space-x-4 w-full lg:w-auto">
+      <ul class="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-4 text-lg">
+        <li class="flex items-center" *ngIf="isLoggedIn">
+          <h5 *ngIf="username | async as username"  class="font-medium text-blue-700">{{ username }}</h5>
+        </li>
+        <li *ngIf="isLoggedIn">
+          <a  class="font-medium hover:font-semibold text-blue-700 hover:text-blue-800" routerLink="/upload">Summarize</a>
+        </li>
+        <li *ngIf="isLoggedIn">
+          <a  class="font-medium hover:font-semibold text-blue-700 hover:text-blue-800" routerLink="/profile">Profile</a>
+        </li>
+        <li *ngIf="!isLoggedIn">
+          <a  class="font-medium hover:font-semibold text-blue-700 hover:text-blue-800" routerLink="/signup">Sign up</a>
+        </li>
+        <li>
+          <a *ngIf="!isLoggedIn" class="font-medium hover:font-semibold text-blue-700 hover:text-blue-800" routerLink="/">Sign In</a>
+          <button *ngIf="isLoggedIn"  class="font-medium hover:font-semibold text-blue-700 hover:text-blue-800" (click)="logout()">Logout</button>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  
 <router-outlet></router-outlet>
